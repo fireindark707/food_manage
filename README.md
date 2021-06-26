@@ -16,6 +16,6 @@
 5. 自動提醒保質期：計算食物保質天數，每次開啟都會提醒
 6. 體積超小：存儲檔不到1KB，程式本身不到30KB
 
-下載地址：https://github.com/fireindark707/food_manage/raw/main/%E9%A3%9F%E7%89%A9%E5%BA%AB%E5%AD%98%E7%AE%A1%E7%90%86%E7%B3%BB%E7%B5%B1.zip
+[下載地址](https://github.com/fireindark707/food_manage/raw/main/%E9%A3%9F%E7%89%A9%E5%BA%AB%E5%AD%98%E7%AE%A1%E7%90%86%E7%B3%BB%E7%B5%B1.zip)
 
 ![](./preview.jpg)
