@@ -18,4 +18,6 @@
 
 [下載地址](https://github.com/fireindark707/food_manage/raw/main/%E9%A3%9F%E7%89%A9%E5%BA%AB%E5%AD%98%E7%AE%A1%E7%90%86%E7%B3%BB%E7%B5%B1.zip)
 
+說明：目前僅限macOS，下載解壓縮後直接雙擊運行food即可。如果有問題請跟我說。windows我還在等人協助提供編譯環境@@ 歡迎協助
+
 ![](./preview.jpg)
