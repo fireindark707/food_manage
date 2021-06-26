@@ -1,4 +1,4 @@
-# food_manage
+# FOODMANAGE
 
 食物庫存管理系統！
 
