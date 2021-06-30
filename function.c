@@ -3,7 +3,7 @@
 
 void pause()
 {
-    printf("請輸入任意字符後按Enter...");
+    printf("\n請輸入任意字符後按Enter...");
     char c;
     scanf(" %c", &c);
 }
@@ -17,9 +17,96 @@ void clear_screen()
 #endif
 }
 
-int input_food(int num, fd stock[200])
+int read_category(char food_type[50][50], char *c_path, FILE *FD_F)
 {
-    char food_type[5][20] = {"零食", "肉", "蔬菜", "主食", "水果"};
+    FD_F = fopen(c_path, "r");
+    int i = 0;
+    if (FD_F == NULL)
+    {
+        strcpy(food_type[0], "None");
+        return 0;
+    }
+    else
+    {
+        while (1)
+        {
+            fscanf(FD_F, "%s", food_type[i]);
+            i += 1;
+            if (feof(FD_F))
+            {
+                break;
+            }
+        }
+    }
+    fclose(FD_F);
+    return i;
+}
+
+void create_category(char *c_path, FILE *FD_F)
+{
+    FD_F = fopen(c_path, "w");
+    fprintf(FD_F, "零食 蛋奶肉 蔬菜 主食 水果 醬料 飲品");
+    fclose(FD_F);
+}
+
+void save_category(char *c_path, FILE *FD_F, int category_num, char food_type[50][50])
+{
+    FD_F = fopen(c_path, "w");
+    for (int i = 0; i < category_num; i++)
+    {
+        fprintf(FD_F, "%s", food_type[i]);
+        if (i != category_num - 1)
+        {
+            fprintf(FD_F, " ");
+        }
+    }
+    fclose(FD_F);
+}
+
+int edit_category(int category_num, char food_type[50][50])
+{
+    int edit;
+    printf("\n目前的食物類別：\n");
+    for (int i = 0; i < category_num; i++)
+    {
+        printf("%d %s\n", i, food_type[i]);
+    }
+    printf("\n請問你是要新增還是修改既有類別？\n0修改\n1新增\n2不修改\n輸入對應數字：");
+    scanf("%d", &edit);
+    if (edit == 0)
+    {
+        int edit_index;
+        printf("請問你要修改的編號是：");
+        scanf("%d", &edit_index);
+        if (edit_index >= category_num || edit_index < 0)
+        {
+            printf("輸入編號錯誤");
+            pause();
+            return category_num;
+        }
+        else
+        {
+            printf("修改[%d-%s]為：", edit_index, food_type[edit_index]);
+            scanf("%s", food_type[edit_index]);
+        }
+    }
+    else if (edit == 1)
+    {
+        category_num += 1;
+        printf("請輸入你要新增的類別：");
+        scanf("%s", food_type[category_num - 1]);
+    }
+    else
+    {
+        printf("退出修改\n");
+        pause();
+        return category_num;
+    }
+    return category_num;
+}
+
+int input_food(int num, fd stock[200], char food_type[50][50], int category_num)
+{
     int type, fresh_days;
     char name[50], buff[50];
     int add_qty = 0;
@@ -49,7 +136,19 @@ int input_food(int num, fd stock[200])
         }
     }
     strcpy(stock[num].Name, name);
-    printf("類別（輸入數字：0零食|1肉|2蔬菜|3主食|4水果）：");
+    printf("類別：（");
+    for (int i = 0; i < category_num; i++)
+    {
+        printf("%d%s", i, food_type[i]);
+        if (i != category_num - 1)
+        {
+            printf("|");
+        }
+        else
+        {
+            printf("）：");
+        }
+    }
     scanf("%d", &type);
     memcpy(stock[num].Type, food_type[type], strlen(food_type[type]) + 1);
     printf("數量（為了簡化，僅支持整數）：");
@@ -103,6 +202,21 @@ void print_food(int num, fd stock[200])
 
 void write_food(char tsv_path[100], int num, FILE *FD_F, fd stock[200])
 {
+    //自動做一個按類別排序的動作
+    fd temp;
+    for (int j = num - 1; j >= 2; j--)
+    {
+        for (int i = 0; i < j; i++)
+        {
+            if (strcmp(stock[i].Type, stock[i + 1].Type) > 0)
+            {
+                temp = stock[i];
+                stock[i] = stock[i + 1];
+                stock[i + 1] = temp;
+            }
+        }
+    }
+
     FD_F = fopen(tsv_path, "w");
     fprintf(FD_F, "名稱\t類別\t數量\t單位\t保質期\n");
     for (int i = 0; i < num; i++)
@@ -180,11 +294,10 @@ int delete_food(int num, fd stock[200])
     return num;
 }
 
-void edit_food(int num, fd stock[200])
+void edit_food(int num, fd stock[200], char food_type[50][50], int category_num)
 {
     int edit_index = 0;
     char n, buff[50];
-    char food_type[5][20] = {"零食", "肉", "蔬菜", "主食", "水果"};
     int type, fresh_days;
     printf("請輸入要修改的食物序號：");
     scanf("%d", &edit_index);
@@ -195,7 +308,7 @@ void edit_food(int num, fd stock[200])
         pause();
         return;
     }
-    printf("請問要修改[%d-%s]的哪一個欄位？\n  1名稱\n  2類型\n  3數量\n  4單位\n  5保質期\n輸入對應數字：", edit_index + 1, stock[edit_index].Name);
+    printf("請問要修改[%d-%s]的哪一個欄位？\n  1名稱\n  2類別\n  3數量\n  4單位\n  5保質期\n輸入對應數字：", edit_index + 1, stock[edit_index].Name);
     scanf(" %c", &n);
     switch (n)
     {
@@ -204,7 +317,20 @@ void edit_food(int num, fd stock[200])
         scanf("%s", stock[edit_index].Name);
         break;
     case '2':
-        printf("現在的類別為「%s」,請輸入新類別（數字：0零食|1肉|2蔬菜|3主食|4水果）：", stock[edit_index].Type);
+        printf("現在的類別為「%s」,請輸入新類別", stock[edit_index].Type);
+        printf("（");
+        for (int i = 0; i < category_num; i++)
+        {
+            printf("%d%s", i, food_type[i]);
+            if (i != category_num - 1)
+            {
+                printf("|");
+            }
+            else
+            {
+                printf("）：");
+            }
+        }
         scanf("%d", &type);
         memcpy(stock[edit_index].Type, food_type[type], strlen(food_type[type]) + 1);
         break;

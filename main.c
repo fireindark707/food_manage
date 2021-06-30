@@ -6,12 +6,15 @@ int main(int argc, char **argv)
     int num = 0; //標記stock數量
     int type;
     int ret;
+    int category_num;
     char pass[20]; //確認用
-    char reminder[100] = ">> 歡迎使用個人食物庫存管理系統v0.3(作者：張郁) <<";
+    char reminder[300] = ">> 歡迎使用個人食物庫存管理系統v0.5(作者：張郁) <<\n提醒：所有的輸入中請勿使用空格、Tab等特殊符號，建議用_替代";
     char tsv_path[100];
     char backup_name[100];
+    char c_path[100];
     char example_date[6][20];
     char buf[100]; //時間用存儲器
+    char food_type[50][50];
 
     FILE *FD_F;
     strcpy(tsv_path, argv[0]);
@@ -19,6 +22,8 @@ int main(int argc, char **argv)
     strcpy(backup_name, argv[0]);
     strcat(backup_name, now(buf));
     strcat(backup_name, "_backup.tsv");
+    strcpy(c_path, argv[0]);
+    strcat(c_path, "_category.txt");
 
     while (1)
     {
@@ -29,9 +34,17 @@ int main(int argc, char **argv)
         puts("g 打造健康食物庫（生成一個範例）");
         puts("e 修改一項食物");
         puts("d 清空所有食物");
+        puts("c 新增/修改類別");
         puts("q 離開（請勿使用左上角X或Ctrl + C方式退出）");
         puts("");
-        //開啟之後先嘗試讀檔
+        //開啟之後先嘗試讀類別檔
+        category_num = read_category(food_type, c_path, FD_F);
+        if (category_num == 0)
+        {
+            create_category(c_path, FD_F);
+            category_num = read_category(food_type, c_path, FD_F);
+        }
+        //讀食物庫存
         num = read_food(tsv_path, FD_F, stock);
         if (num >= 1)
         {
@@ -53,7 +66,7 @@ int main(int argc, char **argv)
         case 'a':
             clear_screen();
             printf("正在添加第%d筆\n", num + 1);
-            num = input_food(num, stock);
+            num = input_food(num, stock, food_type, category_num);
             write_food(tsv_path, num, FD_F, stock);
             strcpy(reminder, "食物加入完成並已寫入food.tsv");
             break;
@@ -111,9 +124,13 @@ int main(int argc, char **argv)
             }
             break;
         case 'e':
-            edit_food(num, stock);
+            edit_food(num, stock, food_type, category_num);
             write_food(tsv_path, num, FD_F, stock);
             strcpy(reminder, "修改已完成");
+            break;
+        case 'c':
+            category_num = edit_category(category_num, food_type);
+            save_category(c_path, FD_F, category_num, food_type);
             break;
         case 'q':
             clear_screen();
